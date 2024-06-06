@@ -98,6 +98,21 @@ simple-chat-app/
 3. **Click "Send"** to post your message to the chat.
 4. Messages will be updated every 3 seconds automatically.
 
+
+Images
+Here are some screenshots of the chat application:
+
+
+Chat interface with real-time messages.
+
+![Chat Interface](chat-interface.png)
+
+
+<!-- User message highlighted in blue.
+![User Message](images/user-message.png) -->
+
+
+
 ## License
 
 This project is licensed under the MIT License. See the LICENSE file for details.
