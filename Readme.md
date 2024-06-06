@@ -19,8 +19,8 @@ A simple chat application built with HTML, CSS, JavaScript, PHP, and MySQL. This
 1. **Clone the repository or download the files:**
 
    ```bash
-   git clone https://github.com/yourusername/simple-chat-app.git
-   cd simple-chat-app
+   git clone https://github.com/Sumit7739/Chat.git
+   cd Chat
    ```
 
 2. **Set up the database:**
