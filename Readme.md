@@ -106,4 +106,3 @@ This project is licensed under the MIT License. See the LICENSE file for details
 
 - Google Fonts for typography.
 - Inspiration from Google Material Design principles.
-```
