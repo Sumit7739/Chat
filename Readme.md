@@ -99,7 +99,7 @@ simple-chat-app/
 4. Messages will be updated every 3 seconds automatically.
 
 
-Images
+## Images
 Here are some screenshots of the chat application:
 
 
