@@ -2,7 +2,7 @@
 $servername = "localhost";
 $username = "root";
 $password = "";
-$dbname = "chat_app";
+$dbname = "chat";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 
