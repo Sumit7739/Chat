@@ -33,33 +33,29 @@ if ($stmt = $conn->prepare($query)) {
     <title>Chat with <?= htmlspecialchars($friend_username) ?></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
             background-color: #f9f9f9;
-            padding-top: 40px;
+            padding-top: 30px;
         }
 
         .container {
-            max-width: 800px;
-            height: 80%;
-            margin: 0 auto;
-            background-color: #fff;
-            border-radius: 8px;
             padding: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
         }
 
         .chat-box {
             border: 1px solid #ddd;
             border-radius: 8px;
-            padding: 10px;
-            height: 600px;
+            padding: 15px;
+            height: 80vh;
             overflow-y: scroll;
         }
 
         .chat-message {
-            padding: 3px;
+            padding: 5px;
+            padding-right: 10px;
             padding-bottom: 0px;
             margin: 5px 0;
             border-radius: 8px;
@@ -86,7 +82,7 @@ if ($stmt = $conn->prepare($query)) {
 
         .delete-btn {
             position: absolute;
-            top: 10px;
+            top: 15px;
             right: 10px;
             background-color: #dc3545;
             color: #fff;
@@ -117,13 +113,46 @@ if ($stmt = $conn->prepare($query)) {
         .btn:hover {
             background-color: #0056b3;
         }
+
+        .back-btn {
+            /* margin-bottom: 200px; */
+            display: inline-block;
+            background-color: #f8f9fa;
+            color: #343a40;
+            border: none;
+            padding: 0px 20px;
+            border-radius: 4px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+            cursor: pointer;
+            position: absolute;
+            right: 0;
+            /* left: 0; */
+            /* bottom: 0; */
+            top: 0;
+            font-size: 30px;
+            /* margin-right: 10px; */
+            /* padding: 10px 20px; */
+        }
+
+        .back-btn i {
+            margin-right: 5px;
+        }
+
+        .back-btn:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 
 <body>
+    <a href="select_friend.php" class="back-btn">
+        <i class="fas fa-arrow-left"></i></a>
+    <!-- add a back arrow icon here -->
     <div class="container">
         <h4><?= htmlspecialchars($friend_fullname) ?>
-            <button class="delete-btn" id="deleteMessagesBtn">Delete</button>
+            <button class="delete-btn" id="deleteMessagesBtn">
+                <i class="fas fa-trash-alt"></i></button>
         </h4>
 
         <div class="chat-box" id="chatBox">

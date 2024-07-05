@@ -1,25 +1,57 @@
+<?php
+session_start();
+include 'db.php'; // Include your database connection
+
+$fullname = $username = $email = $profile_image = $error = '';
+
+if (isset($_SESSION['user_id'])) {
+    $user_id = $_SESSION['user_id'];
+
+    // Query to fetch user details
+    $query = "SELECT full_name, username, email, profile_image FROM users WHERE id = ?";
+
+    if ($stmt = $conn->prepare($query)) {
+        $stmt->bind_param('i', $user_id);
+        $stmt->execute();
+        $stmt->store_result();
+
+        if ($stmt->num_rows > 0) {
+            $stmt->bind_result($fullname, $username, $email, $profile_image);
+            $stmt->fetch();
+        } else {
+            $error = "User not found.";
+        }
+
+        $stmt->close();
+    } else {
+        $error = "Database query failed: " . $conn->error;
+    }
+} else {
+    $error = "Please log in to view your profile.";
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Profile</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <style>
         body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Roboto', sans-serif;
             background-color: #f9f9f9;
             padding-top: 40px;
         }
         .container {
             max-width: 800px;
-            height: 800px;
             margin: 0 auto;
             background-color: #fff;
             border-radius: 8px;
             padding: 20px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
         }
         .profile-image {
             width: 150px;
@@ -28,95 +60,39 @@
             object-fit: cover;
             margin-bottom: 20px;
         }
-        .profile-info {
-            margin-bottom: 20px;
-            text-align: left;
-        }
         .profile-info p {
             margin-bottom: 10px;
             font-size: 16px;
         }
         .btn {
-            display: inline-block;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            text-decoration: none;
-            transition: background-color 0.3s ease;
-            cursor: pointer;
-            margin-top: 50px;
-            margin-left: 20px;
-        }
-        .btn:hover {
-            background-color: #0056b3;
-        }
-        .btn-secondary {
-            background-color: #6c757d;
-        }
-        .btn-secondary:hover {
-            background-color: #5a6268;
-        }
-        .btn-danger {
-            background-color: #dc3545;
-        }
-        .btn-danger:hover {
-            background-color: #c82333;
+            margin-top: 20px;
+            margin-left: 10px;
         }
     </style>
 </head>
 <body>
+    
     <div class="container">
-        <h2>User Profile</h2>
+        <h4>User Profile</h4>
         <div class="row">
-            <div class="three columns">
-                <?php
-                session_start();
-                include 'db.php'; // Include your database connection
-
-                if (isset($_SESSION['user_id'])) {
-                    $user_id = $_SESSION['user_id'];
-
-                    // Query to fetch user details
-                    $query = "SELECT full_name, username, email, profile_image FROM users WHERE id = ?";
-
-                    if ($stmt = $conn->prepare($query)) {
-                        $stmt->bind_param('i', $user_id);
-                        $stmt->execute();
-                        $stmt->store_result();
-
-                        if ($stmt->num_rows > 0) {
-                            $stmt->bind_result($fullname, $username, $email, $profile_image);
-                            $stmt->fetch();
-
-                            // echo "<img class='profile-image u-full-width' src='$profile_image' alt='Profile Picture'>";
-                            echo "<div class='profile-info'>";
-                            echo "<p><strong>Full Name:</strong> $fullname</p>";
-                            echo "<p><strong>Username:</strong> $username</p>";
-                            echo "<p><strong>Email:</strong> $email</p>";
-                            echo "</div>";
-                            // echo "<a href='change_password.php' class='btn'>Change Password</a>";
-                            echo "<a href='feed.php' class='btn'>Search Freind</a>";
-                            echo "<br>";
-
-                            echo "<a href='select_friend.php' class='btn btn-secondary'>Chat</a>";
-                            // echo "<a href='image_add.php' class='btn btn-secondary'>Update Profile</a>";
-                            echo "<a href='logout.php' class='btn btn-danger'>Logout</a>";
-                        } else {
-                            echo "<p>User not found.</p>";
-                        }
-
-                        $stmt->close();
-                    } else {
-                        echo "<p>Database query failed: " . $conn->error . "</p>";
-                    }
-                } else {
-                    echo "<p>Please log in to view your profile.</p>";
-                }
-                ?>
+            <div class="col s12 m4">
+                <?php if ($error): ?>
+                    <p><?php echo $error; ?></p>
+                <?php else: ?>
+                    <img class="profile-image circle responsive-img" src="<?php echo $profile_image; ?>" alt="Profile Picture">
+                    <div class="profile-info">
+                        <p><strong>Full Name:</strong> <?php echo $fullname; ?></p>
+                        <p><strong>Username:</strong> <?php echo $username; ?></p>
+                        <p><strong>Email:</strong> <?php echo $email; ?></p>
+                    </div>
+                    <a href="feed.php" class="btn waves-effect waves-light">Search Friend</a>
+                    <a href="select_friend.php" class="btn waves-effect waves-light grey">Chat</a>
+                    <a href="logout.php" class="btn waves-effect waves-light red">Logout</a>
+                <?php endif; ?>
             </div>
         </div>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 </body>
 </html>

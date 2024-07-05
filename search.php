@@ -1,28 +1,80 @@
+<?php
+session_start();
+include 'db.php';
+
+$users = [];
+$error = '';
+
+if (isset($_SESSION['user_id']) && isset($_GET['query'])) {
+    $current_user_id = $_SESSION['user_id'];
+    $query = $conn->real_escape_string($_GET['query']);
+
+    // Query to search users by username
+    $search_query = "SELECT id, username, full_name FROM users WHERE username LIKE ?";
+    if ($stmt = $conn->prepare($search_query)) {
+        $search_param = "%" . $query . "%";
+        $stmt->bind_param('s', $search_param);
+        $stmt->execute();
+        $stmt->store_result();
+
+        if ($stmt->num_rows > 0) {
+            $stmt->bind_result($id, $username, $fullname);
+            while ($stmt->fetch()) {
+                // Check if the user is already a friend
+                $friend_check_query = "SELECT 1 FROM friends WHERE (user_id = ? AND friend_id = ?) OR (user_id = ? AND friend_id = ?)";
+                if ($friend_check_stmt = $conn->prepare($friend_check_query)) {
+                    $friend_check_stmt->bind_param('iiii', $current_user_id, $id, $id, $current_user_id);
+                    $friend_check_stmt->execute();
+                    $friend_check_stmt->store_result();
+
+                    $is_friend = ($friend_check_stmt->num_rows > 0);
+                    $friend_check_stmt->close();
+
+                    $users[] = [
+                        'id' => $id,
+                        'username' => $username,
+                        'fullname' => $fullname,
+                        'is_friend' => $is_friend
+                    ];
+                } else {
+                    $error = "Database query failed: " . $conn->error;
+                    break; // Stop processing if there's an error
+                }
+            }
+        } else {
+            $error = "No users found.";
+        }
+        $stmt->close();
+    } else {
+        $error = "Database query failed: " . $conn->error;
+    }
+} else {
+    $error = "Please log in to search for users.";
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Results</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/skeleton/2.0.4/skeleton.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
     <style>
         body {
-            font-family: 'Helvetica Neue', Arial, sans-serif;
+            font-family: 'Roboto', sans-serif;
             background-color: #f9f9f9;
             padding-top: 40px;
         }
         .container {
             max-width: 800px;
             margin: 0 auto;
-            background-color: #fff;
-            border-radius: 8px;
-            padding: 20px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            /* padding: 20px; */
         }
         .user {
             border-bottom: 1px solid #ddd;
-            padding: 10px 0;
+            padding: 30px 10px;
         }
         .user:last-child {
             border-bottom: none;
@@ -32,67 +84,49 @@
             margin: 0;
         }
         .btn {
-            display: inline-block;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            text-decoration: none;
-            transition: background-color 0.3s ease;
-            cursor: pointer;
+            /* margin-top: 10px; */
+            margin-bottom: 10px;
         }
-        .btn:hover {
-            background-color: #0056b3;
+        .header {
+            font-size: 24px;
+            font-weight: bold;
+            /* margin-bottom: 20px; */
+        }
+        .users {
+            /* display: flex; */
+            /* flex-wrap: wrap; */
+            justify-content: space-between;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h2>Search Results</h2>
+        <h3 class="header">Search Results</h3>
+        <a href="feed.php" class="btn waves-effect waves-light">Back</a>
         <div class="users">
-            <?php
-            session_start();
-            include 'db.php';
-
-            if (isset($_SESSION['user_id']) && isset($_GET['query'])) {
-                $current_user_id = $_SESSION['user_id'];
-                $query = $conn->real_escape_string($_GET['query']);
-
-                // Query to search users by username
-                $search_query = "SELECT id, username, full_name FROM users WHERE username LIKE ?";
-                if ($stmt = $conn->prepare($search_query)) {
-                    $search_param = "%" . $query . "%";
-                    $stmt->bind_param('s', $search_param);
-                    $stmt->execute();
-                    $stmt->store_result();
-
-                    if ($stmt->num_rows > 0) {
-                        $stmt->bind_result($id, $username, $fullname);
-                        while ($stmt->fetch()) {
-                            echo "<div class='user'>";
-                            echo "<p><strong>Username:</strong> " . htmlspecialchars($username) . "</p>";
-                            echo "<p><strong>Full Name:</strong> " . htmlspecialchars($fullname) . "</p>";
-                            if ($id != $current_user_id) { // Prevent adding self as friend
-                                echo "<form action='add_friend.php' method='post' style='display:inline-block;'>";
-                                echo "<input type='hidden' name='friend_id' value='$id'>";
-                                echo "<button type='submit' class='btn'>Add Friend</button>";
-                                echo "</form>";
-                            }
-                            echo "</div>";
-                        }
-                    } else {
-                        echo "<p>No users found.</p>";
-                    }
-                    $stmt->close();
-                } else {
-                    echo "Database query failed: " . $conn->error;
-                }
-            } else {
-                echo "Please log in to search for users.";
-            }
-            ?>
+            <?php if ($error): ?>
+                <p><?php echo htmlspecialchars($error); ?></p>
+            <?php else: ?>
+                <?php foreach ($users as $user): ?>
+                    <div class="user card-panel hoverable">
+                        <p><strong>Username:</strong> <?php echo htmlspecialchars($user['username']); ?></p>
+                        <p><strong>Full Name:</strong> <?php echo htmlspecialchars($user['fullname']); ?></p>
+                        <?php if ($user['id'] != $current_user_id): ?>
+                            <?php if ($user['is_friend']): ?>
+                                <button class="btn waves-effect waves-light disabled">Already Friend</button>
+                            <?php else: ?>
+                                <form action="add_friend.php" method="post" style="display:inline-block;">
+                                    <input type="hidden" name="friend_id" value="<?php echo $user['id']; ?>">
+                                    <button type="submit" class="btn waves-effect waves-light">Add Friend</button>
+                                </form>
+                            <?php endif; ?>
+                        <?php endif; ?>
+                    </div>
+                <?php endforeach; ?>
+            <?php endif; ?>
         </div>
     </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
 </body>
 </html>

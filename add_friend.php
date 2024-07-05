@@ -30,7 +30,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['user_id']) && isse
                     echo "Database query failed: " . $conn->error;
                 }
             } else {
-                echo "You are already friends with this user.";
+                echo "<h1>You are already friends with this user.</h1>";
+                // echo "<a href='search.php>Go back to the search page</a>";
             }
 
             $stmt->close();
