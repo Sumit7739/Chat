@@ -14,6 +14,7 @@
         }
         .container {
             max-width: 800px;
+            height: 800px;
             margin: 0 auto;
             background-color: #fff;
             border-radius: 8px;
@@ -45,6 +46,8 @@
             text-decoration: none;
             transition: background-color 0.3s ease;
             cursor: pointer;
+            margin-top: 50px;
+            margin-left: 20px;
         }
         .btn:hover {
             background-color: #0056b3;
@@ -87,14 +90,18 @@
                             $stmt->bind_result($fullname, $username, $email, $profile_image);
                             $stmt->fetch();
 
-                            echo "<img class='profile-image u-full-width' src='$profile_image' alt='Profile Picture'>";
+                            // echo "<img class='profile-image u-full-width' src='$profile_image' alt='Profile Picture'>";
                             echo "<div class='profile-info'>";
                             echo "<p><strong>Full Name:</strong> $fullname</p>";
                             echo "<p><strong>Username:</strong> $username</p>";
                             echo "<p><strong>Email:</strong> $email</p>";
                             echo "</div>";
-                            echo "<a href='change_password.php' class='btn'>Change Password</a>";
-                            echo "<a href='image_add.php' class='btn btn-secondary'>Update Profile</a>";
+                            // echo "<a href='change_password.php' class='btn'>Change Password</a>";
+                            echo "<a href='feed.php' class='btn'>Search Freind</a>";
+                            echo "<br>";
+
+                            echo "<a href='select_friend.php' class='btn btn-secondary'>Chat</a>";
+                            // echo "<a href='image_add.php' class='btn btn-secondary'>Update Profile</a>";
                             echo "<a href='logout.php' class='btn btn-danger'>Logout</a>";
                         } else {
                             echo "<p>User not found.</p>";
